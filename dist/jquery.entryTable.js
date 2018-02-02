@@ -217,9 +217,12 @@ var EntryTable = (function () {
                     }
                 }
                 else {
-                    editor_1 = $('<input type="' + col.control + '">');
                     if (col.control === 'number') {
+                        editor_1 = $('<input type="text">');
                         editor_1.attr('onkeypress', 'return event.charCode >= 48 && event.charCode <= 57');
+                    }
+                    else {
+                        editor_1 = $('<input type="' + col.control + '">');
                     }
                     if (row) {
                         editor_1.attr('value', value);
