@@ -143,7 +143,7 @@ var EntryTable = (function () {
             this.options.columns = $.extend(true, [], columns_1, this.options.columns);
         }
         html.push('<tr>');
-        if (this.options.showToolColumn) {
+        if (!this.options.readonly && this.options.showToolColumn) {
             html.push('<th class="is-tool"><i class="fa fa-plus is-tool-add" aria-hidden="true"></i></th>');
         }
         for (var _i = 0, _a = this.options.columns; _i < _a.length; _i++) {
@@ -182,7 +182,7 @@ var EntryTable = (function () {
     EntryTable.prototype.getRowHtml = function (row, r) {
         var html = [];
         html.push('<tr data-id="' + (row ? row.id : '0') + '">');
-        if (this.options.showToolColumn) {
+        if (!this.options.readonly && this.options.showToolColumn) {
             html.push('<td class="is-tool"><i class="fa fa-times is-tool-delete" aria-hidden="true"></i></td>');
         }
         var _loop_1 = function (col) {
@@ -215,6 +215,9 @@ var EntryTable = (function () {
                             editor_1.append(o);
                         });
                     }
+                    if (this_1.options.readonly) {
+                        editor_1.attr('disabled', 'disabled');
+                    }
                 }
                 else {
                     if (col.control === 'number') {
@@ -230,6 +233,9 @@ var EntryTable = (function () {
                     if (col.maxlength) {
                         editor_1.attr('maxlength', col.maxlength);
                     }
+                    if (this_1.options.readonly) {
+                        editor_1.attr('readonly', 'readonly');
+                    }
                 }
                 editor_1.attr('name', col.field);
                 if (col.required) {
@@ -239,6 +245,7 @@ var EntryTable = (function () {
             }
             html.push('</td>');
         };
+        var this_1 = this;
         for (var _i = 0, _a = this.options.columns; _i < _a.length; _i++) {
             var col = _a[_i];
             _loop_1(col);
@@ -301,9 +308,11 @@ var EntryTable = (function () {
         return o;
     };
     EntryTable.prototype.appendRow = function () {
-        this.body.append(this.getRowHtml());
-        this.inputEvents.setEvents(this.body.find('>tr:last :input'));
-        this.inputEvents.setDeleteEvents(this.body.find('>tr:last .is-tool-delete'));
+        if (!this.options.readonly) {
+            this.body.append(this.getRowHtml());
+            this.inputEvents.setEvents(this.body.find('>tr:last :input'));
+            this.inputEvents.setDeleteEvents(this.body.find('>tr:last .is-tool-delete'));
+        }
     };
     return EntryTable;
 }());
@@ -449,19 +458,21 @@ var EntryTableEvnets = (function () {
         this.hasFocus = false;
         var currentTr = $(target).closest('tr');
         this.blurRowIndex = currentTr.index();
-        setTimeout((function () {
-            if (!_this.hasFocus || _this.blurRowIndex !== _this.focusRowIndex) {
-                if (currentTr.find('.is-dirty').length > 0 && _this.table.options.onSaveRow) {
-                    console.log('save row');
-                    var rowData = _this.table.getRowData(currentTr);
-                    console.log(rowData);
-                    _this.table.options.onSaveRow(rowData, new entryTableRow_1.EntryTableRow(currentTr));
+        if (!this.table.options.readonly) {
+            setTimeout((function () {
+                if (!_this.hasFocus || _this.blurRowIndex !== _this.focusRowIndex) {
+                    if (currentTr.find('.is-dirty').length > 0 && _this.table.options.onSaveRow) {
+                        console.log('save row');
+                        var rowData = _this.table.getRowData(currentTr);
+                        console.log(rowData);
+                        _this.table.options.onSaveRow(rowData, new entryTableRow_1.EntryTableRow(currentTr));
+                    }
                 }
-            }
-        }).bind(this), 100);
+            }).bind(this), 100);
+        }
     };
     EntryTableEvnets.prototype.onDelete = function (target) {
-        if (this.table.options.onDeleteRow) {
+        if (!this.table.options.readonly && this.table.options.onDeleteRow) {
             var currentTr = $(target).closest('tr');
             var rowData = this.table.getRowData(currentTr);
             this.table.options.onDeleteRow(rowData, new entryTableRow_1.EntryTableRow(currentTr));
@@ -546,6 +557,7 @@ exports.EntryTableRow = EntryTableRow;
 exports.__esModule = true;
 var DefaultEntryTableOptions = (function () {
     function DefaultEntryTableOptions() {
+        this.readonly = false;
         this.showToolColumn = true;
         this.columns = [];
         this.data = [];

@@ -143,20 +143,22 @@ export class EntryTableEvnets {
         this.hasFocus = false;
         const currentTr = $(target).closest('tr');
         this.blurRowIndex = currentTr.index();
-        setTimeout((() => {
-            if (!this.hasFocus || this.blurRowIndex !== this.focusRowIndex) {
-                if (currentTr.find('.is-dirty').length > 0 && this.table.options.onSaveRow) {
-                    console.log('save row');
-                    const rowData = this.table.getRowData(currentTr);
-                    console.log(rowData);
-                    this.table.options.onSaveRow(rowData, new EntryTableRow(currentTr));
+        if (!this.table.options.readonly) {
+            setTimeout((() => {
+                if (!this.hasFocus || this.blurRowIndex !== this.focusRowIndex) {
+                    if (currentTr.find('.is-dirty').length > 0 && this.table.options.onSaveRow) {
+                        console.log('save row');
+                        const rowData = this.table.getRowData(currentTr);
+                        console.log(rowData);
+                        this.table.options.onSaveRow(rowData, new EntryTableRow(currentTr));
+                    }
                 }
-            }
-        }).bind(this), 100);
+            }).bind(this), 100);
+        }
     }
 
     private onDelete(target: any) {
-        if (this.table.options.onDeleteRow) {
+        if (!this.table.options.readonly && this.table.options.onDeleteRow) {
             const currentTr = $(target).closest('tr');
             const rowData = this.table.getRowData(currentTr);
             this.table.options.onDeleteRow(rowData, new EntryTableRow(currentTr));

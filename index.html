@@ -22,6 +22,7 @@
     <script>
     $(function(){
         $('#mainTable').entryTable({
+          readonly:true,
           columns:[
             {title:'NO.', field:'NO', width:'40px'},
             {title:'D/C', field:'DC', control:'select', options:[{text:'DC0',value:0},{text:'DC1',value:1}], required:true},

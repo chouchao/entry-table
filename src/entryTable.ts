@@ -47,7 +47,7 @@ export class EntryTable {
         }
 
         html.push('<tr>');
-        if (this.options.showToolColumn) {
+        if (!this.options.readonly && this.options.showToolColumn) {
             html.push('<th class="is-tool"><i class="fa fa-plus is-tool-add" aria-hidden="true"></i></th>');
         }
         for (const col of this.options.columns) {
@@ -90,7 +90,7 @@ export class EntryTable {
     private getRowHtml(row?: any, r?: string): string {
         const html = [];
         html.push('<tr data-id="' + (row ? row.id : '0') + '">');
-        if (this.options.showToolColumn) {
+        if (!this.options.readonly && this.options.showToolColumn) {
             html.push('<td class="is-tool"><i class="fa fa-times is-tool-delete" aria-hidden="true"></i></td>');
         }
         for (const col of this.options.columns) {
@@ -121,8 +121,11 @@ export class EntryTable {
                             editor.append(o);
                         });
                     }
+                    if (this.options.readonly) {
+                        editor.attr('disabled', 'disabled');
+                    }
                 } else {
-                    if(col.control === 'number') {
+                    if (col.control === 'number') {
                         editor = $('<input type="text">');
                         editor.attr('onkeypress',
                         'return event.charCode >= 48 && event.charCode <= 57');
@@ -134,6 +137,9 @@ export class EntryTable {
                     }
                     if (col.maxlength) {
                         editor.attr('maxlength', col.maxlength);
+                    }
+                    if (this.options.readonly) {
+                        editor.attr('readonly', 'readonly');
                     }
                 }
                 editor.attr('name', col.field);
@@ -205,8 +211,10 @@ export class EntryTable {
     }
 
     appendRow() {
-        this.body.append(this.getRowHtml());
-        this.inputEvents.setEvents(this.body.find('>tr:last :input'));
-        this.inputEvents.setDeleteEvents(this.body.find('>tr:last .is-tool-delete'));
+        if (!this.options.readonly) {
+            this.body.append(this.getRowHtml());
+            this.inputEvents.setEvents(this.body.find('>tr:last :input'));
+            this.inputEvents.setDeleteEvents(this.body.find('>tr:last .is-tool-delete'));
+        }
     }
 }
