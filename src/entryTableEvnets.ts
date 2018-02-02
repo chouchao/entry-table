@@ -39,7 +39,7 @@ export class EntryTableEvnets {
                         return false;
                     // Enter || Tab
                     } else if (event.which === 13 || event.which === 9) {
-                        this.onEnter(event.target);
+                        this.onEnter(event.target, event.which === 13);
                         event.preventDefault();
                         event.stopPropagation();
                         return false;
@@ -85,8 +85,12 @@ export class EntryTableEvnets {
         }
     }
 
-    private onEnter(target: any) {
+    private onEnter(target: any, isEnter: boolean) {
         console.log('onEnter');
+        // 有错误时回车键不自动跳到下一个
+        if (isEnter && $(target).is('.is-invalid')) {
+            return;
+        }
         const currentTd = $(target).closest('td');
         if (!currentTd) { return; }
         const nextTd = currentTd.next(':not(".is-tool")');

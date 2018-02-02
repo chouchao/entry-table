@@ -110,7 +110,7 @@ var entryTable_1 = __webpack_require__(1);
 
 exports.__esModule = true;
 var entryTableEvnets_1 = __webpack_require__(2);
-var entryTableOptions_1 = __webpack_require__(3);
+var entryTableOptions_1 = __webpack_require__(5);
 var EntryTable = (function () {
     function EntryTable($, element, options) {
         this.$ = $;
@@ -217,7 +217,10 @@ var EntryTable = (function () {
                     }
                 }
                 else {
-                    editor_1 = $('<input type="text">');
+                    editor_1 = $('<input type="' + col.control + '">');
+                    if (col.control === 'number') {
+                        editor_1.attr('onkeypress', 'return event.charCode >= 48 && event.charCode <= 57');
+                    }
                     if (row) {
                         editor_1.attr('value', value);
                     }
@@ -311,8 +314,8 @@ exports.EntryTable = EntryTable;
 "use strict";
 
 exports.__esModule = true;
-var entryTableCell_1 = __webpack_require__(6);
-var entryTableRow_1 = __webpack_require__(5);
+var entryTableCell_1 = __webpack_require__(3);
+var entryTableRow_1 = __webpack_require__(4);
 var EntryTableEvnets = (function () {
     function EntryTableEvnets(table, inputs, btns) {
         this.table = table;
@@ -342,7 +345,7 @@ var EntryTableEvnets = (function () {
                     return false;
                 }
                 else if (event.which === 13 || event.which === 9) {
-                    this.onEnter(event.target);
+                    this.onEnter(event.target, event.which === 13);
                     event.preventDefault();
                     event.stopPropagation();
                     return false;
@@ -384,8 +387,11 @@ var EntryTableEvnets = (function () {
             $(target).removeClass('is-invalid');
         }
     };
-    EntryTableEvnets.prototype.onEnter = function (target) {
+    EntryTableEvnets.prototype.onEnter = function (target, isEnter) {
         console.log('onEnter');
+        if (isEnter && $(target).is('.is-invalid')) {
+            return;
+        }
         var currentTd = $(target).closest('td');
         if (!currentTd) {
             return;
@@ -476,47 +482,6 @@ exports.EntryTableEvnets = EntryTableEvnets;
 "use strict";
 
 exports.__esModule = true;
-var DefaultEntryTableOptions = (function () {
-    function DefaultEntryTableOptions() {
-        this.showToolColumn = true;
-        this.columns = [];
-        this.data = [];
-    }
-    return DefaultEntryTableOptions;
-}());
-exports.DefaultEntryTableOptions = DefaultEntryTableOptions;
-
-
-/***/ }),
-/* 4 */,
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
-var EntryTableRow = (function () {
-    function EntryTableRow(tr) {
-        this.tr = tr;
-    }
-    EntryTableRow.prototype.setId = function (id) {
-        this.tr.attr('data-id', id);
-    };
-    EntryTableRow.prototype["delete"] = function () {
-        this.tr.remove();
-    };
-    return EntryTableRow;
-}());
-exports.EntryTableRow = EntryTableRow;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
 var EntryTableCell = (function () {
     function EntryTableCell(input) {
         this.input = input;
@@ -533,6 +498,58 @@ var EntryTableCell = (function () {
     return EntryTableCell;
 }());
 exports.EntryTableCell = EntryTableCell;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var EntryTableRow = (function () {
+    function EntryTableRow(tr, lastInput) {
+        this.tr = tr;
+        this.lastInput = lastInput;
+    }
+    EntryTableRow.prototype.setId = function (id) {
+        this.tr.attr('data-id', id);
+    };
+    EntryTableRow.prototype["delete"] = function () {
+        this.tr.remove();
+    };
+    EntryTableRow.prototype.isInvalid = function () {
+        return this.tr.find('.is-invalid').length > 0;
+    };
+    EntryTableRow.prototype.focusInvalid = function () {
+        if (this.lastInput && this.lastInput.is('.is-invalid')) {
+            this.lastInput[0].focus();
+        }
+        else if (this.tr.find('.is-invalid').length > 0) {
+            this.tr.find('.is-invalid')[0].focus();
+        }
+    };
+    return EntryTableRow;
+}());
+exports.EntryTableRow = EntryTableRow;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var DefaultEntryTableOptions = (function () {
+    function DefaultEntryTableOptions() {
+        this.showToolColumn = true;
+        this.columns = [];
+        this.data = [];
+    }
+    return DefaultEntryTableOptions;
+}());
+exports.DefaultEntryTableOptions = DefaultEntryTableOptions;
 
 
 /***/ })

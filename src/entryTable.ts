@@ -122,7 +122,11 @@ export class EntryTable {
                         });
                     }
                 } else {
-                    editor = $('<input type="text">');
+                    editor = $('<input type="' + col.control + '">');
+                    if(col.control === 'number') {
+                        editor.attr('onkeypress',
+                        'return event.charCode >= 48 && event.charCode <= 57');
+                    }
                     if (row) {
                         editor.attr('value', value);
                     }
