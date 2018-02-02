@@ -7,4 +7,4 @@ table td input.is-dirty,table td select.is-dirty {
 table td input.is-invalid,table td select.is-invalid {
     border: 1px solid #FF0000;
 }
-table th.is-tool i,table td.is-tool i { cursor: pointer; }
+table th.is-tool i,table td.is-tool i { cursor: pointer; color: #FF0000; }
