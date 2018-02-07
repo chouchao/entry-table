@@ -1,0 +1,39 @@
+/* entry-table */
+.entry-table,.entry-select,.entry-select-list {
+    font-size: 12px;
+}
+table td input.is-dirty,table td select.is-dirty {
+    font-weight: bold;
+}
+table td input.is-invalid,table td select.is-invalid {
+    border: 1px solid #FF0000;
+}
+table th.is-tool i,table td.is-tool i { cursor: pointer; color: #FF0000; }
+
+/* entry-select */
+.entry-select-list {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    border: 1px solid #cccccc;
+    background-color: #ffffff;
+    max-height: 200px;
+}
+.entry-select-list table {
+    width: 100%;
+}
+.entry-select-list tbody td {
+    word-break: keep-all;
+    white-space:nowrap;
+    padding-left: 5px;
+}
+
+.entry-select-list tbody tr {
+    cursor: pointer;
+}
+.entry-select-list tbody tr:hover {
+    background-color:#97e4f7;
+}
+
+.entry-select-list .list-item-selected,.table-striped .entry-select-list tbody tr:nth-of-type(odd).list-item-selected {
+    background-color:#139fc2;
+}
