@@ -15,6 +15,8 @@
   <body>
     <h1>entry table</h1>
     <table id="mainTable" class="table table-striped entry-table"></table>
+    <br>
+    <div class="padding-20"><input type="text" id="mainSelect" class="entry-select"></div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="node_modules/jquery/dist/jquery.min.js" ></script>
@@ -22,11 +24,27 @@
     <script>
     $(function(){
         $('#mainTable').entryTable({
-          readonly:true,
+          //readonly:true,
           columns:[
-            {title:'NO.', field:'NO', width:'40px'},
+            {title:'NO.', field:'NO', width:'40px', controlClasses:['test-color', 'test-border']},
             {title:'D/C', field:'DC', control:'select', options:[{text:'DC0',value:0},{text:'DC1',value:1}], required:true},
-            {title:'G/L Account', field:'GLAccount', required:true, maxlength:17},
+            {title:'G/L Account', field:'GLAccount', required:true, maxlength:17, control:'entry-select', entrySelectOptions:
+              {data:[
+              {'text':'Account 1', 'value':'100000088'},
+              {'text':'Account 2', 'value':'200000088'},
+              {'text':'Account 3', 'value':'301000088'},
+              {'text':'Account 4', 'value':'500200099'},
+              {'text':'Account 5', 'value':'100000088'},
+              {'text':'Account 6', 'value':'200000088'},
+              {'text':'Account 7', 'value':'301000088'},
+              {'text':'Account 8', 'value':'500200099'},
+              {'text':'Account 9', 'value':'100000088'},
+              {'text':'Account 10', 'value':'200000088'},
+              {'text':'Account 11', 'value':'301000088'},
+              {'text':'Account 12', 'value':'500200099'},
+              ],
+            }
+            },
             {title:'Amount', field:'Amount', required:true, maxlength:16},
             {title:'Tax Code', field:'TaxCode', required:true, maxlength:2},
             {title:'Cost Center', field:'CostCenter', control:'number', required:true},
@@ -34,7 +52,7 @@
             {title:'Text', field:'Text'}
           ],
           data:[
-            {NO:1, DC: 0, GLAccount: 1000000001, Amount:101.20, TaxCode:'A1',CostCenter:90000001,Assignment:'aa', Text:'bb'},
+            {NO:1, DC: 0, GLAccount: 100000088, Amount:101.20, TaxCode:'A1',CostCenter:90000001,Assignment:'aa', Text:'bb'},
             {NO:2, DC: 1, GLAccount: 1000000002, Amount:102.20, TaxCode:'A2',CostCenter:90000001,Assignment:'aa', Text:'bb'},
             {NO:3, DC: 1, GLAccount: 1000000003, Amount:103.20, TaxCode:'A3',CostCenter:90000001,Assignment:'aa', Text:'bb'},
             {NO:4, DC: 0, GLAccount: 1000000004, Amount:104.20, TaxCode:'A4',CostCenter:90000001,Assignment:'aa', Text:'bb'},
@@ -49,6 +67,22 @@
             row.delete();
           }
         });
+
+        $('#mainSelect').entrySelect({
+          data:[
+            {'text':'Account 1', 'value':'100000088'},
+            {'text':'Account 2', 'value':'200000088'},
+            {'text':'Account 3', 'value':'301000088'},
+            {'text':'Account 4', 'value':'500200099'},
+            {'text':'Account 5', 'value':'100000088'},
+            {'text':'Account 6', 'value':'200000088'},
+            {'text':'Account 7', 'value':'301000088'},
+            {'text':'Account 8', 'value':'500200099'},
+            {'text':'Account 9', 'value':'100000088'},
+            {'text':'Account 10', 'value':'200000088'},
+            {'text':'Account 11', 'value':'301000088'},
+            {'text':'Account 12', 'value':'500200099'},
+          ]});
     });
     </script>
   </body>

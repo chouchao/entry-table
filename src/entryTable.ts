@@ -10,8 +10,8 @@ export class EntryTable {
     private inputEvents: EntryTableEvnets;
 
     constructor(
-        public $: JQuery,
-        public element: JQuery,
+        private $: JQuery,
+        private element: JQuery,
         options?: IEntryTableOptions,
     ) {
         this.options = $.extend({}, new DefaultEntryTableOptions(), options);
@@ -78,9 +78,10 @@ export class EntryTable {
             }
         }
         this.body.html(html.join(''));
+        this.onLoadRows(this.body.find('>tr'));
     }
 
-    refreshData(data: any) {
+    setData(data: any) {
         this.initEvents(false);
         this.options.data = data;
         this.initBody();
@@ -129,6 +130,8 @@ export class EntryTable {
                         editor = $('<input type="text">');
                         editor.attr('onkeypress',
                         'return event.charCode >= 48 && event.charCode <= 57');
+                    } else if (col.control === 'entry-select') {
+                        editor = $('<input type="' + col.control + '" class="entry-select">');
                     } else {
                         editor = $('<input type="' + col.control + '">');
                     }
@@ -143,6 +146,12 @@ export class EntryTable {
                     }
                 }
                 editor.attr('name', col.field);
+                if (col.controlClasses) {
+                    const controlClasses = col.controlClasses as string[];
+                    controlClasses.forEach((item) => {
+                        editor.addClass(item);
+                    });
+                }
                 if (col.required) {
                     editor.attr('required', 'required');
                 }
@@ -179,6 +188,10 @@ export class EntryTable {
         }
     }
 
+    getAddButton() {
+        return this.element.find('>thead .is-tool-add');
+    }
+
     getData(): any[] {
         const data = new Array();
         this.element.find('>tbody>tr').each((index, elem) => {
@@ -197,7 +210,7 @@ export class EntryTable {
     private serializeObject(target: JQuery) {
         const o: { [k: string]: any } = {};
         const a = target.serializeArray();
-        $.each(a, function () {
+        $.each(a, function() {
             if (o[this.name]) {
                 if (!o[this.name].push) {
                     o[this.name] = [o[this.name]];
@@ -215,6 +228,37 @@ export class EntryTable {
             this.body.append(this.getRowHtml());
             this.inputEvents.setEvents(this.body.find('>tr:last :input'));
             this.inputEvents.setDeleteEvents(this.body.find('>tr:last .is-tool-delete'));
+            this.changeIsInvalid(this.body.find('>tr:last :input'));
+            this.onLoadRows(this.body.find('>tr:last'));
+        }
+    }
+
+    changeIsInvalid(inputs: JQuery) {
+        inputs.each((index, elem) => {
+            if ($(elem).val() === '') {
+                const field = $(elem).attr('name');
+                const columns = this.options.columns.filter((c) => c.field === field);
+                if (columns.length > 0 && columns[0].required) {
+                    $(elem).addClass('is-invalid');
+                }
+            } else {
+                $(elem).removeClass('is-invalid');
+            }
+        });
+    }
+
+    private onLoadRows(trs: JQuery) {
+        trs.find('.entry-select').each((index, elem) => {
+            const field = $(elem).attr('name');
+            const columns = this.options.columns.filter((c) => c.field === field);
+            if (columns.length > 0) {
+                $(elem).entrySelect(columns[0].entrySelectOptions);
+            }
+        });
+        if (this.options.onLoadRows) {
+            const rowIndexs = new Array<number>();
+            trs.each((index, elem) => rowIndexs.push($(elem).index()));
+            this.options.onLoadRows(rowIndexs);
         }
     }
 }

@@ -62,7 +62,7 @@ export class EntryTableEvnets {
     }
 
     setAddEvents() {
-        const  btns = this.table.element.find('>thead .is-tool-add');
+        const  btns = this.table.getAddButton();
         btns.off('click').on('click', function(event: Event) {
             this.table.appendRow();
         }.bind(this));
@@ -74,19 +74,11 @@ export class EntryTableEvnets {
             $(target).addClass('is-dirty');
         }
 
-        if ($(target).val() === '') {
-            const field = $(target).attr('name');
-            const columns = this.table.options.columns.filter((c) => c.field === field);
-            if (columns.length > 0 && columns[0].required) {
-                $(target).addClass('is-invalid');
-            }
-        } else {
-            $(target).removeClass('is-invalid');
-        }
+        this.table.changeIsInvalid($(target));
     }
 
     private onEnter(target: any, isEnter: boolean) {
-        console.log('onEnter');
+        // console.log('onEnter');
         // 有错误时回车键不自动跳到下一个
         if (isEnter && $(target).is('.is-invalid')) {
             return;
@@ -108,7 +100,7 @@ export class EntryTableEvnets {
         }
     }
     private onShiftEnter(target: any) {
-        console.log('onShiftEnter');
+        // console.log('onShiftEnter');
         const currentTd = $(target).closest('td');
         if (!currentTd) { return; }
         const prevTd = currentTd.prev(':not(".is-tool"):has(:input[type!="hidden"])');
@@ -133,13 +125,13 @@ export class EntryTableEvnets {
     }
 
     private onFocus(target: any) {
-        console.log('focus:' + $(target).val());
+        // console.log('focus:' + $(target).val());
         this.hasFocus = true;
         this.focusRowIndex = $(target).closest('tr').index();
     }
 
     private onBlur(target: any) {
-        console.log('blur:' + $(target).val());
+        // console.log('blur:' + $(target).val());
         this.hasFocus = false;
         const currentTr = $(target).closest('tr');
         this.blurRowIndex = currentTr.index();

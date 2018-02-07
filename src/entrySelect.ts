@@ -19,7 +19,7 @@ export class EntrySelect {
         this.initList();
         this.initEvents();
         this.resetButtonCss();
-        console.log('EntrySelect inited');
+        // console.log('EntrySelect inited');
     }
 
     private initList() {
@@ -40,7 +40,7 @@ export class EntrySelect {
         return which === 8  // Backspace键
         || (which >= 48 && which <= 57) // 对应按键 0 - 9(非小键盘)
         || (which >= 96 && which <= 105) // 对应按键 0 - 9(小键盘)
-        || (which >= 65 && which <= 90) // 对应按键 A - Z
+        || (which >= 65 && which <= 90); // 对应按键 A - Z
     }
 
     private initEvents() {
@@ -139,7 +139,7 @@ export class EntrySelect {
                 }
             }, 500);
         }
-        console.log('EntrySelect hide List');
+        // console.log('EntrySelect hide List');
     }
 
     /** 显示列表
@@ -176,10 +176,7 @@ export class EntrySelect {
             const tr = $(event.target).parent();
             this.applySelectedItem(tr);
         });
-        // if (selected) {
-        //     this.scrollToListItem(this.getSelectedItem());
-        // }
-        console.log('EntrySelect show List');
+        // console.log('EntrySelect show List');
     }
 
     private resetShowListCss() {
@@ -259,11 +256,12 @@ export class EntrySelect {
     }
 
     private applySelectedItem(item: JQuery) {
+        this.element[0].focus();
         this.element.val(item.attr('data-text'));
         this.valueElement.val(item.attr('data-value'));
+        this.element.trigger('change');
         this.hideList(true);
         this.resetButtonCss();
-        this.element[0].focus();
     }
 
     getValue() {
@@ -280,10 +278,13 @@ export class EntrySelect {
             this.element.val('');
             this.valueElement.val('');
         }
+        this.element.trigger('change');
     }
 
     setData(data: any[]) {
         this.options.data = data;
-        this.setValue(this.valueElement.val());
+        if (this.options.updateValueOnSetData) {
+            this.setValue(this.valueElement.val());
+        }
     }
 }

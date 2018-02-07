@@ -9,6 +9,7 @@ export interface IEntryTableOptions {
     onSaveRow: (data: any, row: EntryTableRow) => void;
     onDeleteRow: (data: any, row: EntryTableRow) => void;
     onClickCell: (value: any, cell: EntryTableCell) => void;
+    onLoadRows: (rowIndexs: number[]) => void;
 }
 
 export class DefaultEntryTableOptions implements IEntryTableOptions {
@@ -19,4 +20,5 @@ export class DefaultEntryTableOptions implements IEntryTableOptions {
     onSaveRow: (data: any, row: EntryTableRow) => void;
     onDeleteRow: (data: any, row: EntryTableRow) => void;
     onClickCell: (value: any, cell: EntryTableCell) => void;
+    onLoadRows: (rowIndexs: number[]) => void;
 }

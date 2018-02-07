@@ -5,6 +5,7 @@ export class EntryTableRow {
 
     setId(id: string) {
         this.tr.attr('data-id', id);
+        this.tr.find('.is-dirty').removeClass('is-dirty');
     }
 
     delete() {
