@@ -1,5 +1,5 @@
 /// <reference path="../node_modules/@ryancavanaugh/jquery/index.d.ts" />
-import { DefaultEntrySelectOptions, IEntrySelectOptions } from './EntrySelectOptions';
+import { DefaultEntrySelectOptions, IEntrySelectOptions, IPositionElement } from './EntrySelectOptions';
 
 export class EntrySelect {
     private listItemSelectedClass = 'list-item-selected';
@@ -20,11 +20,13 @@ export class EntrySelect {
         this.initEvents();
         this.resetButtonCss();
         // console.log('EntrySelect inited');
+
+        this.loadData(true);
     }
 
     private initList() {
         const name = this.element.attr('name');
-        this.valueElement = $(`<input type="hidden" name="${name}">`);
+        this.valueElement = $(`<input type="hidden" name="${name}">`).val(this.element.val());
         this.buttonElement = $(`<i class="fa fa-caret-down"></i>`);
         this.listElement = $(`<div class="entry-select-list"></div>`);
         this.listElement.hide();
@@ -32,8 +34,6 @@ export class EntrySelect {
         .after(this.valueElement)
         .after(this.listElement)
         .after(this.buttonElement);
-
-        this.setValue(this.options.value);
     }
 
     private isCharWhich(which: number): boolean {
@@ -119,14 +119,16 @@ export class EntrySelect {
     }
 
     private resetButtonCss() {
-        const elementPosition = this.element.position();
-        this.buttonElement.css({
-            'position': 'absolute',
-            'left': elementPosition.left + this.element.width() - this.buttonElement.width(),
-            'top': elementPosition.top + ((this.element.outerHeight() - this.buttonElement.height()) / 2),
-            'z-index': 1,
-            'cursor': 'pointer',
-        });
+        if (this.element && typeof this.element.position === 'function') {
+            const elementPosition = this.element.position();
+            this.buttonElement.css({
+                'position': 'absolute',
+                'left': elementPosition.left + this.element.width() - this.buttonElement.width(),
+                'top': elementPosition.top + ((this.element.outerHeight() - this.buttonElement.height()) / 2),
+                'z-index': 1,
+                'cursor': 'pointer',
+            });
+        }
     }
 
     private hideList(force = false) {
@@ -281,10 +283,69 @@ export class EntrySelect {
         this.element.trigger('change');
     }
 
-    setData(data: any[]) {
-        this.options.data = data;
-        if (this.options.updateValueOnSetData) {
-            this.setValue(this.valueElement.val());
+    setData(data?: any[]) {
+        if (data) {
+            this.options.data = data;
+            if (this.options.updateValueOnSetData) {
+                this.setValue(this.valueElement.val());
+            }
+        } else {
+            this.loadData(this.options.updateValueOnSetData);
+        }
+    }
+
+    private loadData(canUpdateValue = true) {
+        if (this.options.url && typeof this.options.url === 'string') {
+            const param = {};
+            if(typeof this.options.onBeforeLoadData === 'function'){
+                if (this.options.onBeforeLoadData(this.element, this.options, param) === false) {
+                    return;
+                }
+            }
+            $.ajax({
+                url: this.options.url,
+                method: this.options.ajaxMethod,
+                data: param,
+                dataType: 'json',
+                cache: false,
+                success: (data) => {
+                    if (Array.isArray(data)) {
+                        if (typeof this.options.onConvertData === 'function') {
+                            this.options.data = this.options.onConvertData(data);
+                        } else {
+                            this.options.data = data;
+                        }
+                        if (canUpdateValue) {
+                            this.setValue(this.options.value);
+                        }
+                        if (typeof this.options.onLoadDataSuccess === 'function') {
+                            this.options.onLoadDataSuccess(this.element, this.options);
+                        }
+                    } else {
+                        if (typeof this.options.onLoadDataError === 'function') {
+                            this.options.onLoadDataError(this.element, this.options, 'Data type not a array');
+                        }
+                    }
+                },
+                error: (jqXHR, textStatus, errorThrown) => {
+                    if (typeof this.options.onLoadDataError === 'function') {
+                        this.options.onLoadDataError(this.element, this.options, errorThrown);
+                    }
+                },
+            });
+        } else {
+            if (Array.isArray(this.options.data)) {
+                if (canUpdateValue) {
+                    this.setValue(this.options.value);
+                }
+                if (typeof this.options.onLoadDataSuccess === 'function') {
+                    this.options.onLoadDataSuccess(this.element, this.options);
+                }
+            } else {
+                if (typeof this.options.onLoadDataError === 'function') {
+                    this.options.onLoadDataError(this.element, this.options, 'Data type not a array');
+                }
+            }
         }
     }
 }

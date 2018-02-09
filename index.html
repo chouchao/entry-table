@@ -17,7 +17,8 @@
     <h1>entry table</h1>
     <table id="mainTable" class="table table-striped entry-table"></table>
     <br>
-    <div class="padding-20"><input type="text" id="mainSelect" class="entry-select"></div>
+    <div class="padding-20"><input type="text" id="mainSelect" class="entry-select"><button id="mainSelectSetData">set data</button></div>
+    <div><button id="maintableSetSelectData1">set table select data1</button><button id="maintableSetSelectData2">set table select data2</button></div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="node_modules/jquery/dist/jquery.min.js" ></script>
@@ -30,21 +31,9 @@
             {title:'NO.', field:'NO', width:'40px', controlClasses:['test-color', 'test-border']},
             {title:'D/C', field:'DC', control:'select', options:[{text:'DC0',value:0},{text:'DC1',value:1}], required:true},
             {title:'G/L Account', field:'GLAccount', required:true, maxlength:17, control:'entry-select', entrySelectOptions:
-              {data:[
-              {'text':'Account 1', 'value':'100000088'},
-              {'text':'Account 2', 'value':'200000088'},
-              {'text':'Account 3', 'value':'301000088'},
-              {'text':'Account 4', 'value':'500200099'},
-              {'text':'Account 5', 'value':'100000088'},
-              {'text':'Account 6', 'value':'200000088'},
-              {'text':'Account 7', 'value':'301000088'},
-              {'text':'Account 8', 'value':'500200099'},
-              {'text':'Account 9', 'value':'100000088'},
-              {'text':'Account 10', 'value':'200000088'},
-              {'text':'Account 11', 'value':'301000088'},
-              {'text':'Account 12', 'value':'500200099'},
-              ],
-            }
+              {data:[], updateValueOnSetData:false, url:'http://127.0.0.1:8080/assets/glaccount.json', ajaxMethod:'GET', onBeforeLoadData: function(el, opt, pa){
+                console.log('opt.value:' + opt.value);
+              }}
             },
             {title:'Amount', field:'Amount', required:true, maxlength:16},
             {title:'Tax Code', field:'TaxCode', required:true, maxlength:2},
@@ -71,6 +60,22 @@
 
         $('#mainSelect').entrySelect({
           data:[
+            // {'text':'Account 1', 'value':'100000088'},
+            // {'text':'Account 2', 'value':'200000088'},
+            // {'text':'Account 3', 'value':'301000088'},
+            // {'text':'Account 4', 'value':'500200099'},
+            // {'text':'Account 5', 'value':'100000088'},
+            // {'text':'Account 6', 'value':'200000088'},
+            // {'text':'Account 7', 'value':'301000088'},
+            // {'text':'Account 8', 'value':'500200099'},
+            // {'text':'Account 9', 'value':'100000088'},
+            // {'text':'Account 10', 'value':'200000088'},
+            // {'text':'Account 11', 'value':'301000088'},
+            // {'text':'Account 12', 'value':'500200099'},
+          ]});
+
+        $('#mainSelectSetData').click(function(){
+          $('#mainSelect').entrySelect('setData', [
             {'text':'Account 1', 'value':'100000088'},
             {'text':'Account 2', 'value':'200000088'},
             {'text':'Account 3', 'value':'301000088'},
@@ -83,7 +88,44 @@
             {'text':'Account 10', 'value':'200000088'},
             {'text':'Account 11', 'value':'301000088'},
             {'text':'Account 12', 'value':'500200099'},
-          ]});
+          ]);
+        });
+
+        
+
+        $('#maintableSetSelectData1').click(function(){
+          $('#mainTable .entry-select').entrySelect('setData', [
+            {'text':'Account 1', 'value':'100000088'},
+            {'text':'Account 2', 'value':'200000088'},
+            {'text':'Account 3', 'value':'301000088'},
+            {'text':'Account 4', 'value':'500200099'},
+            {'text':'Account 5', 'value':'100000088'},
+            {'text':'Account 6', 'value':'200000088'},
+            {'text':'Account 7', 'value':'301000088'},
+            {'text':'Account 8', 'value':'500200099'},
+            {'text':'Account 9', 'value':'100000088'},
+            {'text':'Account 10', 'value':'200000088'},
+            {'text':'Account 11', 'value':'301000088'},
+            {'text':'Account 12', 'value':'500200099'},
+          ]);
+        });
+
+        $('#maintableSetSelectData2').click(function(){
+          $('#mainTable .entry-select').entrySelect('setData', [
+            {'text':'Account 21', 'value':'100000087'},
+            {'text':'Account 22', 'value':'200000087'},
+            {'text':'Account 23', 'value':'301000087'},
+            {'text':'Account 24', 'value':'500200097'},
+            {'text':'Account 25', 'value':'100000087'},
+            {'text':'Account 26', 'value':'200000087'},
+            {'text':'Account 27', 'value':'301000087'},
+            {'text':'Account 28', 'value':'500200097'},
+            {'text':'Account 29', 'value':'100000086'},
+            {'text':'Account 210', 'value':'200000085'},
+            {'text':'Account 211', 'value':'301000085'},
+            {'text':'Account 212', 'value':'500200095'},
+          ]);
+        });
     });
     </script>
   </body>

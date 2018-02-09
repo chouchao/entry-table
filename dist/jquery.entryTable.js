@@ -146,10 +146,11 @@ var EntrySelect = (function () {
         this.initList();
         this.initEvents();
         this.resetButtonCss();
+        this.loadData(true);
     }
     EntrySelect.prototype.initList = function () {
         var name = this.element.attr('name');
-        this.valueElement = $("<input type=\"hidden\" name=\"" + name + "\">");
+        this.valueElement = $("<input type=\"hidden\" name=\"" + name + "\">").val(this.element.val());
         this.buttonElement = $("<i class=\"fa fa-caret-down\"></i>");
         this.listElement = $("<div class=\"entry-select-list\"></div>");
         this.listElement.hide();
@@ -157,7 +158,6 @@ var EntrySelect = (function () {
             .after(this.valueElement)
             .after(this.listElement)
             .after(this.buttonElement);
-        this.setValue(this.options.value);
     };
     EntrySelect.prototype.isCharWhich = function (which) {
         return which === 8
@@ -235,14 +235,16 @@ var EntrySelect = (function () {
         $(window).off('resize', this.resetButtonCss).on('resize', this.resetButtonCss);
     };
     EntrySelect.prototype.resetButtonCss = function () {
-        var elementPosition = this.element.position();
-        this.buttonElement.css({
-            'position': 'absolute',
-            'left': elementPosition.left + this.element.width() - this.buttonElement.width(),
-            'top': elementPosition.top + ((this.element.outerHeight() - this.buttonElement.height()) / 2),
-            'z-index': 1,
-            'cursor': 'pointer'
-        });
+        if (this.element && typeof this.element.position === 'function') {
+            var elementPosition = this.element.position();
+            this.buttonElement.css({
+                'position': 'absolute',
+                'left': elementPosition.left + this.element.width() - this.buttonElement.width(),
+                'top': elementPosition.top + ((this.element.outerHeight() - this.buttonElement.height()) / 2),
+                'z-index': 1,
+                'cursor': 'pointer'
+            });
+        }
     };
     EntrySelect.prototype.hideList = function (force) {
         var _this = this;
@@ -379,9 +381,74 @@ var EntrySelect = (function () {
         this.element.trigger('change');
     };
     EntrySelect.prototype.setData = function (data) {
-        this.options.data = data;
-        if (this.options.updateValueOnSetData) {
-            this.setValue(this.valueElement.val());
+        if (data) {
+            this.options.data = data;
+            if (this.options.updateValueOnSetData) {
+                this.setValue(this.valueElement.val());
+            }
+        }
+        else {
+            this.loadData(this.options.updateValueOnSetData);
+        }
+    };
+    EntrySelect.prototype.loadData = function (canUpdateValue) {
+        var _this = this;
+        if (canUpdateValue === void 0) { canUpdateValue = true; }
+        if (this.options.url && typeof this.options.url === 'string') {
+            var param = {};
+            if (typeof this.options.onBeforeLoadData === 'function') {
+                if (this.options.onBeforeLoadData(this.element, this.options, param) === false) {
+                    return;
+                }
+            }
+            $.ajax({
+                url: this.options.url,
+                method: this.options.ajaxMethod,
+                data: param,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (Array.isArray(data)) {
+                        if (typeof _this.options.onConvertData === 'function') {
+                            _this.options.data = _this.options.onConvertData(data);
+                        }
+                        else {
+                            _this.options.data = data;
+                        }
+                        if (canUpdateValue) {
+                            _this.setValue(_this.options.value);
+                        }
+                        if (typeof _this.options.onLoadDataSuccess === 'function') {
+                            _this.options.onLoadDataSuccess(_this.element, _this.options);
+                        }
+                    }
+                    else {
+                        if (typeof _this.options.onLoadDataError === 'function') {
+                            _this.options.onLoadDataError(_this.element, _this.options, 'Data type not a array');
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (typeof _this.options.onLoadDataError === 'function') {
+                        _this.options.onLoadDataError(_this.element, _this.options, errorThrown);
+                    }
+                }
+            });
+        }
+        else {
+            if (Array.isArray(this.options.data)) {
+                if (canUpdateValue) {
+                    this.setValue(this.options.value);
+                }
+                if (typeof this.options.onLoadDataSuccess === 'function') {
+                    this.options.onLoadDataSuccess(this.element, this.options);
+                }
+            }
+            else {
+                if (typeof this.options.onLoadDataError === 'function') {
+                    this.options.onLoadDataError(this.element, this.options, 'Data type not a array');
+                }
+            }
         }
     };
     return EntrySelect;
@@ -403,6 +470,8 @@ var DefaultEntrySelectOptions = (function () {
         this.listHeight = 200;
         this.value = '';
         this.updateValueOnSetData = true;
+        this.url = '';
+        this.ajaxMethod = 'POST';
     }
     return DefaultEntrySelectOptions;
 }());
