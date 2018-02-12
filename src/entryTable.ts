@@ -130,8 +130,12 @@ export class EntryTable {
                         editor = $('<input type="text">');
                         editor.attr('onkeypress',
                         'return event.charCode >= 48 && event.charCode <= 57');
+                        editor.attr('onchange',
+                        'this.value = this.value.replace(/[^0-9]/g,\'\')');
                     } else if (col.control === 'entry-select') {
-                        editor = $('<input type="' + col.control + '" class="entry-select">');
+                        editor = $('<input type="text" class="entry-select">');
+                    } else if (col.control === 'entry-code-name') {
+                        editor = $('<input type="text" class="entry-code-name">');
                     } else {
                         editor = $('<input type="' + col.control + '">');
                     }
@@ -255,7 +259,14 @@ export class EntryTable {
                 $(elem).entrySelect(columns[0].entrySelectOptions);
             }
         });
-        if (this.options.onLoadRows) {
+        trs.find('.entry-code-name').each((index, elem) => {
+            const field = $(elem).attr('name');
+            const columns = this.options.columns.filter((c) => c.field === field);
+            if (columns.length > 0) {
+                $(elem).entryCodeName(columns[0].entryCodeOptions);
+            }
+        });
+        if (typeof this.options.onLoadRows === 'function') {
             const rowIndexs = new Array<number>();
             trs.each((index, elem) => rowIndexs.push($(elem).index()));
             this.options.onLoadRows(rowIndexs);

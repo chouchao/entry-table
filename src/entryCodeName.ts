@@ -1,20 +1,19 @@
 /// <reference path="../node_modules/@ryancavanaugh/jquery/index.d.ts" />
-import { DefaultEntrySelectOptions, IEntrySelectOptions } from './EntrySelectOptions';
+import { DefaultEntryCodeNameOptions, IEntryCodeNameOptions } from './EntryCodeNameOptions';
 
-export class EntrySelect {
+export class EntryCodeName {
     private listItemSelectedClass = 'list-item-selected';
     private isListMouseOver: boolean;
-    private valueElement: JQuery;
     private listElement: JQuery;
     private buttonElement: JQuery;
-    public options: IEntrySelectOptions;
+    public options: IEntryCodeNameOptions;
 
     constructor(
         private $: JQuery,
         private element: JQuery,
-        options?: IEntrySelectOptions,
+        options?: IEntryCodeNameOptions,
     ) {
-        this.options = $.extend({}, new DefaultEntrySelectOptions(), options);
+        this.options = $.extend({}, new DefaultEntryCodeNameOptions(), options);
         this.options.value = this.options.value || this.element.val();
         this.initList();
         this.initEvents();
@@ -26,12 +25,10 @@ export class EntrySelect {
 
     private initList() {
         const name = this.element.attr('name');
-        this.valueElement = $(`<input type="hidden" name="${name}">`).val(this.element.val());
         this.buttonElement = $(`<i class="fa fa-caret-down"></i>`);
         this.listElement = $(`<div class="entry-select-list"></div>`);
         this.listElement.hide();
-        this.element.attr('name', name + '_text')
-        .after(this.valueElement)
+        this.element
         .after(this.listElement)
         .after(this.buttonElement);
     }
@@ -74,11 +71,16 @@ export class EntrySelect {
             // Shift + Enter || Tab
             if (this.isCharWhich(event.which)) {
                 const v = this.element.val();
+                this.element.attr('title', '');
                 console.log(`element value:${v}`);
                 if (v !== '') {
                     const data = this.options.data
                     .filter((item) => item.value.indexOf(v) >= 0 || item.text.indexOf(v) >= 0);
-                    this.showList(data);
+                    if (data.length > 0) {
+                        this.showList(data);
+                    } else {
+                        this.hideList(true);
+                    }
                 }
             }
         })
@@ -92,7 +94,6 @@ export class EntrySelect {
             this.hideList();
         }).off('mouseover').on('mouseover', (event) => {
             this.isListMouseOver = true;
-            // this.hideList(event.target);
         });
 
         this.buttonElement.off('mouseleave').on('mouseleave', (event) => {
@@ -100,13 +101,12 @@ export class EntrySelect {
             this.hideList();
         }).off('mouseover').on('mouseover', (event) => {
             this.isListMouseOver = true;
-            // this.hideList(event.target);
         }).on('click', (event) => {
             if (this.listIsVisible()) {
                 this.hideList(true);
             } else {
                 this.showList(this.options.data);
-                if(!this.element.is(':focus')) {
+                if (!this.element.is(':focus')) {
                     this.element[0].focus();
                 }
                 event.preventDefault();
@@ -132,6 +132,7 @@ export class EntrySelect {
     }
 
     private hideList(force = false) {
+        console.log('hide list');
         if (force) {
             this.listElement.hide();
         } else {
@@ -141,7 +142,6 @@ export class EntrySelect {
                 }
             }, 500);
         }
-        // console.log('EntrySelect hide List');
     }
 
     /** 显示列表
@@ -150,6 +150,8 @@ export class EntrySelect {
      */
     private showList(data: any[]) {
         // this.element.position().left
+        console.log('show list');
+
         const html = new Array();
         let selected = false;
         let selectedClass: string;
@@ -174,7 +176,7 @@ export class EntrySelect {
         this.resetShowListCss();
         this.listElement.find('>table>tbody>tr>td').off('click')
         .on('click', (event) => {
-            console.log('td click');
+            // console.log('td click');
             const tr = $(event.target).parent();
             this.applySelectedItem(tr);
         });
@@ -259,35 +261,36 @@ export class EntrySelect {
 
     private applySelectedItem(item: JQuery) {
         this.element[0].focus();
-        this.element.val(item.attr('data-text'));
-        this.valueElement.val(item.attr('data-value'));
-        this.element.trigger('change');
+        this.setValue(item.attr('data-value'));
+
         this.hideList(true);
         this.resetButtonCss();
     }
 
     getValue() {
-        this.valueElement.val();
+        this.element.val();
     }
 
     setValue(value: string) {
+        // 设置值
+        this.element.val(value);
+        this.element.trigger('change');
+
+        // 查找并设置title
         const data = this.options.data as any[];
         const opt = data.filter((item) => item.value === value);
         if (opt.length > 0) {
-            this.element.val(opt[0].text);
-            this.valueElement.val(opt[0].value);
+            this.element.attr('title', opt[0].text);
         } else {
-            this.element.val('');
-            this.valueElement.val('');
+            this.element.attr('title', '');
         }
-        this.element.trigger('change');
     }
 
     setData(data?: any[]) {
         if (data) {
             this.options.data = data;
             if (this.options.updateValueOnSetData) {
-                this.setValue(this.valueElement.val());
+                this.setValue(this.element.val());
             }
         } else {
             this.loadData(this.options.updateValueOnSetData);
@@ -297,7 +300,7 @@ export class EntrySelect {
     private loadData(canUpdateValue = true) {
         if (this.options.url && typeof this.options.url === 'string') {
             const param = {};
-            if(typeof this.options.onBeforeLoadData === 'function'){
+            if (typeof this.options.onBeforeLoadData === 'function') {
                 if (this.options.onBeforeLoadData(this.element, this.options, param) === false) {
                     return;
                 }

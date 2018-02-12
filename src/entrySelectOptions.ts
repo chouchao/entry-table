@@ -25,7 +25,3 @@ export class DefaultEntrySelectOptions implements IEntrySelectOptions {
     onLoadDataError: (target: JQuery, options: IEntrySelectOptions, errMessage: string) => void;
     onConvertData: (data: any) => any[];
 }
-
-export interface IPositionElement {
-    position(): JQueryCoordinates;
-}

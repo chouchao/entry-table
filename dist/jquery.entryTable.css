@@ -1,5 +1,5 @@
 /* entry-table */
-.entry-table,.entry-select,.entry-select-list {
+.entry-table,.entry-select,.entry-select-list,.entry-code-name {
     font-size: 12px;
 }
 table td input.is-dirty,table td select.is-dirty {

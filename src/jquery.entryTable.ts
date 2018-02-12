@@ -1,3 +1,5 @@
+import { EntryCodeName } from './entryCodeName';
+import { IEntryCodeNameOptions } from './entryCodeNameOptions';
 import { EntrySelect } from './entrySelect';
 import { IEntrySelectOptions } from './EntrySelectOptions';
 import { EntryTable } from './entryTable';
@@ -52,6 +54,30 @@ import { IEntryTableOptions } from './entryTableOptions';
             } else {
                 $(this).data('entrySelect',
                 new EntrySelect($, $(this), options as IEntrySelectOptions));
+            }
+        });
+        return j;
+    };
+
+    $.fn.entryCodeName = function(options: (IEntryCodeNameOptions | string), param?: any) {
+        const j = $(this);
+        let result: any;
+        j.each(function() {
+            if (isString(options)) {
+                const state = $(this).data('entrySelect') as EntryCodeName;
+                if (state) {
+                    const method = options as string;
+                    if (method === 'setValue') {
+                        state.setValue(param);
+                    } else if (method === 'getValue') {
+                        result = state.getValue();
+                    } else if (method === 'setData') {
+                        result = state.setData(param);
+                    }
+                }
+            } else {
+                $(this).data('entrySelect',
+                new EntryCodeName($, $(this), options as IEntryCodeNameOptions));
             }
         });
         return j;

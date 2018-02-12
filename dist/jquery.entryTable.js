@@ -70,8 +70,9 @@
 "use strict";
 
 exports.__esModule = true;
-var entrySelect_1 = __webpack_require__(1);
-var entryTable_1 = __webpack_require__(3);
+var entryCodeName_1 = __webpack_require__(1);
+var entrySelect_1 = __webpack_require__(3);
+var entryTable_1 = __webpack_require__(5);
 (function ($) {
     function isString(x) {
         return typeof x === 'string';
@@ -125,6 +126,31 @@ var entryTable_1 = __webpack_require__(3);
         });
         return j;
     };
+    $.fn.entryCodeName = function (options, param) {
+        var j = $(this);
+        var result;
+        j.each(function () {
+            if (isString(options)) {
+                var state = $(this).data('entrySelect');
+                if (state) {
+                    var method = options;
+                    if (method === 'setValue') {
+                        state.setValue(param);
+                    }
+                    else if (method === 'getValue') {
+                        result = state.getValue();
+                    }
+                    else if (method === 'setData') {
+                        result = state.setData(param);
+                    }
+                }
+            }
+            else {
+                $(this).data('entrySelect', new entryCodeName_1.EntryCodeName($, $(this), options));
+            }
+        });
+        return j;
+    };
 })(jQuery);
 
 
@@ -135,7 +161,360 @@ var entryTable_1 = __webpack_require__(3);
 "use strict";
 
 exports.__esModule = true;
-var EntrySelectOptions_1 = __webpack_require__(2);
+var EntryCodeNameOptions_1 = __webpack_require__(2);
+var EntryCodeName = (function () {
+    function EntryCodeName($, element, options) {
+        this.$ = $;
+        this.element = element;
+        this.listItemSelectedClass = 'list-item-selected';
+        this.options = $.extend({}, new EntryCodeNameOptions_1.DefaultEntryCodeNameOptions(), options);
+        this.options.value = this.options.value || this.element.val();
+        this.initList();
+        this.initEvents();
+        this.resetButtonCss();
+        this.loadData(true);
+    }
+    EntryCodeName.prototype.initList = function () {
+        var name = this.element.attr('name');
+        this.buttonElement = $("<i class=\"fa fa-caret-down\"></i>");
+        this.listElement = $("<div class=\"entry-select-list\"></div>");
+        this.listElement.hide();
+        this.element
+            .after(this.listElement)
+            .after(this.buttonElement);
+    };
+    EntryCodeName.prototype.isCharWhich = function (which) {
+        return which === 8
+            || (which >= 48 && which <= 57)
+            || (which >= 96 && which <= 105)
+            || (which >= 65 && which <= 90);
+    };
+    EntryCodeName.prototype.initEvents = function () {
+        var _this = this;
+        this.element.on('change', function (event) {
+        })
+            .on('keydown', function (event) {
+            if (event.which === 13) {
+                if (_this.listIsVisible() && _this.hasSelectedItem()) {
+                    _this.applySelectedItem(_this.getSelectedItem());
+                }
+            }
+            else if (event.which === 40) {
+                if (_this.listIsVisible()) {
+                    _this.selectNextListItem();
+                }
+                else {
+                    _this.showList(_this.options.data);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                }
+            }
+            else if (event.which === 38) {
+                if (_this.listIsVisible()) {
+                    _this.selectPrevListItem();
+                }
+            }
+        })
+            .on('keyup', function (event) {
+            if (_this.isCharWhich(event.which)) {
+                var v_1 = _this.element.val();
+                _this.element.attr('title', '');
+                console.log("element value:" + v_1);
+                if (v_1 !== '') {
+                    var data = _this.options.data
+                        .filter(function (item) { return item.value.indexOf(v_1) >= 0 || item.text.indexOf(v_1) >= 0; });
+                    if (data.length > 0) {
+                        _this.showList(data);
+                    }
+                    else {
+                        _this.hideList(true);
+                    }
+                }
+            }
+        })
+            .on('blur', function (event) {
+            _this.hideList();
+            _this.resetButtonCss();
+        });
+        this.listElement.off('mouseleave').on('mouseleave', function (event) {
+            _this.isListMouseOver = false;
+            _this.hideList();
+        }).off('mouseover').on('mouseover', function (event) {
+            _this.isListMouseOver = true;
+        });
+        this.buttonElement.off('mouseleave').on('mouseleave', function (event) {
+            _this.isListMouseOver = false;
+            _this.hideList();
+        }).off('mouseover').on('mouseover', function (event) {
+            _this.isListMouseOver = true;
+        }).on('click', function (event) {
+            if (_this.listIsVisible()) {
+                _this.hideList(true);
+            }
+            else {
+                _this.showList(_this.options.data);
+                if (!_this.element.is(':focus')) {
+                    _this.element[0].focus();
+                }
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            }
+        });
+        $(window).off('resize', this.resetButtonCss).on('resize', this.resetButtonCss);
+    };
+    EntryCodeName.prototype.resetButtonCss = function () {
+        if (this.element && typeof this.element.position === 'function') {
+            var elementPosition = this.element.position();
+            this.buttonElement.css({
+                'position': 'absolute',
+                'left': elementPosition.left + this.element.width() - this.buttonElement.width(),
+                'top': elementPosition.top + ((this.element.outerHeight() - this.buttonElement.height()) / 2),
+                'z-index': 1,
+                'cursor': 'pointer'
+            });
+        }
+    };
+    EntryCodeName.prototype.hideList = function (force) {
+        var _this = this;
+        if (force === void 0) { force = false; }
+        console.log('hide list');
+        if (force) {
+            this.listElement.hide();
+        }
+        else {
+            setTimeout(function () {
+                if (!_this.isListMouseOver) {
+                    _this.listElement.hide();
+                }
+            }, 500);
+        }
+    };
+    EntryCodeName.prototype.showList = function (data) {
+        var _this = this;
+        console.log('show list');
+        var html = new Array();
+        var selected = false;
+        var selectedClass;
+        var elementValue = this.element.val();
+        data.forEach(function (item) {
+            if (!selected && (item.value == elementValue || item.text == elementValue)) {
+                selectedClass = " class=\"" + _this.listItemSelectedClass + "\" ";
+                selected = true;
+            }
+            else {
+                selectedClass = '';
+            }
+            html.push('<tr data-text="' + item.text
+                + '" data-value="' + item.value + '"' + selectedClass + '><td>' + item.value
+                + '</td><td>' + item.text + '</td></tr>');
+        });
+        this.listElement.html('<table><tbody>' + html.join('') + '</tbody></table>');
+        var elementPosition = this.element.position();
+        var listWidth = (this.options.listWidth || this.element.outerWidth()) + 'px';
+        var listheight = (this.options.listHeight || 200) + 'px';
+        this.resetShowListCss();
+        this.listElement.find('>table>tbody>tr>td').off('click')
+            .on('click', function (event) {
+            var tr = $(event.target).parent();
+            _this.applySelectedItem(tr);
+        });
+    };
+    EntryCodeName.prototype.resetShowListCss = function () {
+        var elementPosition = this.element.position();
+        var listWidth = (this.options.listWidth || this.element.outerWidth()) + 'px';
+        var listheight = (this.options.listHeight || 200) + 'px';
+        this.listElement.css({
+            'display': 'block',
+            'position': 'absolute',
+            'left': elementPosition.left,
+            'top': elementPosition.top + this.element.outerHeight() + 1,
+            'z-index': 11,
+            'width': listWidth,
+            'height': 'auto'
+        });
+    };
+    EntryCodeName.prototype.listIsVisible = function () {
+        return this.listElement.is(':visible');
+    };
+    EntryCodeName.prototype.selectNextListItem = function () {
+        if (this.listIsVisible()) {
+            var item = this.listElement.find('.' + this.listItemSelectedClass);
+            var nextItem = void 0;
+            if (item.length > 0) {
+                nextItem = item.next();
+            }
+            else {
+                nextItem = this.listElement.find('>table>tbody>tr:first');
+            }
+            if (nextItem.length > 0) {
+                item.removeClass(this.listItemSelectedClass);
+                nextItem.addClass(this.listItemSelectedClass);
+                this.scrollToListItem(nextItem);
+            }
+        }
+    };
+    EntryCodeName.prototype.selectPrevListItem = function () {
+        if (this.listIsVisible()) {
+            var item = this.listElement.find('.' + this.listItemSelectedClass);
+            var prevItem = void 0;
+            if (item.length > 0) {
+                prevItem = item.prev();
+                if (prevItem.length > 0) {
+                    item.removeClass(this.listItemSelectedClass);
+                    prevItem.addClass(this.listItemSelectedClass);
+                    this.scrollToListItem(prevItem);
+                }
+            }
+        }
+    };
+    EntryCodeName.prototype.scrollToListItem = function (targetItem) {
+        var listbottom = this.listElement.offset().top + this.listElement.height();
+        var nextbottom = targetItem.offset().top + targetItem.outerHeight();
+        if (nextbottom > listbottom) {
+            this.listElement.scrollTop(nextbottom - listbottom + this.listElement.scrollTop());
+        }
+        var listtop = this.listElement.offset().top;
+        var prevtop = targetItem.offset().top;
+        if (prevtop < listtop) {
+            this.listElement.scrollTop(this.listElement.scrollTop() - (listtop - prevtop));
+        }
+    };
+    EntryCodeName.prototype.getSelectedItem = function () {
+        return this.listElement.find('.' + this.listItemSelectedClass);
+    };
+    EntryCodeName.prototype.hasSelectedItem = function () {
+        return this.getSelectedItem().length > 0;
+    };
+    EntryCodeName.prototype.applySelectedItem = function (item) {
+        this.element[0].focus();
+        this.setValue(item.attr('data-value'));
+        this.hideList(true);
+        this.resetButtonCss();
+    };
+    EntryCodeName.prototype.getValue = function () {
+        this.element.val();
+    };
+    EntryCodeName.prototype.setValue = function (value) {
+        this.element.val(value);
+        this.element.trigger('change');
+        var data = this.options.data;
+        var opt = data.filter(function (item) { return item.value === value; });
+        if (opt.length > 0) {
+            this.element.attr('title', opt[0].text);
+        }
+        else {
+            this.element.attr('title', '');
+        }
+    };
+    EntryCodeName.prototype.setData = function (data) {
+        if (data) {
+            this.options.data = data;
+            if (this.options.updateValueOnSetData) {
+                this.setValue(this.element.val());
+            }
+        }
+        else {
+            this.loadData(this.options.updateValueOnSetData);
+        }
+    };
+    EntryCodeName.prototype.loadData = function (canUpdateValue) {
+        var _this = this;
+        if (canUpdateValue === void 0) { canUpdateValue = true; }
+        if (this.options.url && typeof this.options.url === 'string') {
+            var param = {};
+            if (typeof this.options.onBeforeLoadData === 'function') {
+                if (this.options.onBeforeLoadData(this.element, this.options, param) === false) {
+                    return;
+                }
+            }
+            $.ajax({
+                url: this.options.url,
+                method: this.options.ajaxMethod,
+                data: JSON.stringify(param),
+                contentType: 'application/json',
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (Array.isArray(data)) {
+                        if (typeof _this.options.onConvertData === 'function') {
+                            _this.options.data = _this.options.onConvertData(data);
+                        }
+                        else {
+                            _this.options.data = data;
+                        }
+                        if (canUpdateValue) {
+                            _this.setValue(_this.options.value);
+                        }
+                        if (typeof _this.options.onLoadDataSuccess === 'function') {
+                            _this.options.onLoadDataSuccess(_this.element, _this.options);
+                        }
+                    }
+                    else {
+                        if (typeof _this.options.onLoadDataError === 'function') {
+                            _this.options.onLoadDataError(_this.element, _this.options, 'Data type not a array');
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (typeof _this.options.onLoadDataError === 'function') {
+                        _this.options.onLoadDataError(_this.element, _this.options, errorThrown);
+                    }
+                }
+            });
+        }
+        else {
+            if (Array.isArray(this.options.data)) {
+                if (canUpdateValue) {
+                    this.setValue(this.options.value);
+                }
+                if (typeof this.options.onLoadDataSuccess === 'function') {
+                    this.options.onLoadDataSuccess(this.element, this.options);
+                }
+            }
+            else {
+                if (typeof this.options.onLoadDataError === 'function') {
+                    this.options.onLoadDataError(this.element, this.options, 'Data type not a array');
+                }
+            }
+        }
+    };
+    return EntryCodeName;
+}());
+exports.EntryCodeName = EntryCodeName;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var DefaultEntryCodeNameOptions = (function () {
+    function DefaultEntryCodeNameOptions() {
+        this.data = [];
+        this.listWidth = undefined;
+        this.listHeight = 200;
+        this.value = '';
+        this.updateValueOnSetData = true;
+        this.url = '';
+        this.ajaxMethod = 'POST';
+    }
+    return DefaultEntryCodeNameOptions;
+}());
+exports.DefaultEntryCodeNameOptions = DefaultEntryCodeNameOptions;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var EntrySelectOptions_1 = __webpack_require__(4);
 var EntrySelect = (function () {
     function EntrySelect($, element, options) {
         this.$ = $;
@@ -404,7 +783,8 @@ var EntrySelect = (function () {
             $.ajax({
                 url: this.options.url,
                 method: this.options.ajaxMethod,
-                data: param,
+                data: JSON.stringify(param),
+                contentType: 'application/json',
                 dataType: 'json',
                 cache: false,
                 success: function (data) {
@@ -457,7 +837,7 @@ exports.EntrySelect = EntrySelect;
 
 
 /***/ }),
-/* 2 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -479,14 +859,14 @@ exports.DefaultEntrySelectOptions = DefaultEntrySelectOptions;
 
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
-var entryTableEvnets_1 = __webpack_require__(4);
-var entryTableOptions_1 = __webpack_require__(7);
+var entryTableEvnets_1 = __webpack_require__(6);
+var entryTableOptions_1 = __webpack_require__(9);
 var EntryTable = (function () {
     function EntryTable($, element, options) {
         this.$ = $;
@@ -600,9 +980,13 @@ var EntryTable = (function () {
                     if (col.control === 'number') {
                         editor_1 = $('<input type="text">');
                         editor_1.attr('onkeypress', 'return event.charCode >= 48 && event.charCode <= 57');
+                        editor_1.attr('onchange', 'this.value = this.value.replace(/[^0-9]/g,\'\')');
                     }
                     else if (col.control === 'entry-select') {
-                        editor_1 = $('<input type="' + col.control + '" class="entry-select">');
+                        editor_1 = $('<input type="text" class="entry-select">');
+                    }
+                    else if (col.control === 'entry-code-name') {
+                        editor_1 = $('<input type="text" class="entry-code-name">');
                     }
                     else {
                         editor_1 = $('<input type="' + col.control + '">');
@@ -729,7 +1113,14 @@ var EntryTable = (function () {
                 $(elem).entrySelect(columns[0].entrySelectOptions);
             }
         });
-        if (this.options.onLoadRows) {
+        trs.find('.entry-code-name').each(function (index, elem) {
+            var field = $(elem).attr('name');
+            var columns = _this.options.columns.filter(function (c) { return c.field === field; });
+            if (columns.length > 0) {
+                $(elem).entryCodeName(columns[0].entryCodeOptions);
+            }
+        });
+        if (typeof this.options.onLoadRows === 'function') {
             var rowIndexs_1 = new Array();
             trs.each(function (index, elem) { return rowIndexs_1.push($(elem).index()); });
             this.options.onLoadRows(rowIndexs_1);
@@ -741,14 +1132,14 @@ exports.EntryTable = EntryTable;
 
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
-var entryTableCell_1 = __webpack_require__(5);
-var entryTableRow_1 = __webpack_require__(6);
+var entryTableCell_1 = __webpack_require__(7);
+var entryTableRow_1 = __webpack_require__(8);
 var EntryTableEvnets = (function () {
     function EntryTableEvnets(table, inputs, btns) {
         this.table = table;
@@ -898,7 +1289,7 @@ exports.EntryTableEvnets = EntryTableEvnets;
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -923,7 +1314,7 @@ exports.EntryTableCell = EntryTableCell;
 
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -958,7 +1349,7 @@ exports.EntryTableRow = EntryTableRow;
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

@@ -17,8 +17,9 @@
     <h1>entry table</h1>
     <table id="mainTable" class="table table-striped entry-table"></table>
     <br>
-    <div class="padding-20"><input type="text" id="mainSelect" class="entry-select"><button id="mainSelectSetData">set data</button></div>
-    <div><button id="maintableSetSelectData1">set table select data1</button><button id="maintableSetSelectData2">set table select data2</button></div>
+    <div class="padding-20"><input type="text" id="mainSelect" class="entry-select"></div>
+    <div class="padding-20"><input type="text" id="mainCodeName" class="entry-code-name"></div>
+    <div class="padding-20"><input type="text" onkeypress="return event.charCode >= 48 && event.charCode <= 57" onchange="this.value = this.value.replace(/[^0-9]/g,'')"></div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="node_modules/jquery/dist/jquery.min.js" ></script>
@@ -60,72 +61,35 @@
 
         $('#mainSelect').entrySelect({
           data:[
-            // {'text':'Account 1', 'value':'100000088'},
-            // {'text':'Account 2', 'value':'200000088'},
-            // {'text':'Account 3', 'value':'301000088'},
-            // {'text':'Account 4', 'value':'500200099'},
-            // {'text':'Account 5', 'value':'100000088'},
-            // {'text':'Account 6', 'value':'200000088'},
-            // {'text':'Account 7', 'value':'301000088'},
-            // {'text':'Account 8', 'value':'500200099'},
-            // {'text':'Account 9', 'value':'100000088'},
-            // {'text':'Account 10', 'value':'200000088'},
-            // {'text':'Account 11', 'value':'301000088'},
-            // {'text':'Account 12', 'value':'500200099'},
+            {'text':'Account 1', 'value':'100000088'},
+            {'text':'Account 2', 'value':'200000088'},
+            {'text':'Account 3', 'value':'301000088'},
+            {'text':'Account 4', 'value':'500200099'},
+            {'text':'Account 5', 'value':'100000088'},
+            {'text':'Account 6', 'value':'200000088'},
+            {'text':'Account 7', 'value':'301000088'},
+            {'text':'Account 8', 'value':'500200099'},
+            {'text':'Account 9', 'value':'100000088'},
+            {'text':'Account 10', 'value':'200000088'},
+            {'text':'Account 11', 'value':'301000088'},
+            {'text':'Account 12', 'value':'500200099'},
           ]});
 
-        $('#mainSelectSetData').click(function(){
-          $('#mainSelect').entrySelect('setData', [
-            {'text':'Account 1', 'value':'100000088'},
-            {'text':'Account 2', 'value':'200000088'},
-            {'text':'Account 3', 'value':'301000088'},
-            {'text':'Account 4', 'value':'500200099'},
-            {'text':'Account 5', 'value':'100000088'},
-            {'text':'Account 6', 'value':'200000088'},
-            {'text':'Account 7', 'value':'301000088'},
-            {'text':'Account 8', 'value':'500200099'},
-            {'text':'Account 9', 'value':'100000088'},
-            {'text':'Account 10', 'value':'200000088'},
-            {'text':'Account 11', 'value':'301000088'},
-            {'text':'Account 12', 'value':'500200099'},
-          ]);
-        });
-
-        
-
-        $('#maintableSetSelectData1').click(function(){
-          $('#mainTable .entry-select').entrySelect('setData', [
-            {'text':'Account 1', 'value':'100000088'},
-            {'text':'Account 2', 'value':'200000088'},
-            {'text':'Account 3', 'value':'301000088'},
-            {'text':'Account 4', 'value':'500200099'},
-            {'text':'Account 5', 'value':'100000088'},
-            {'text':'Account 6', 'value':'200000088'},
-            {'text':'Account 7', 'value':'301000088'},
-            {'text':'Account 8', 'value':'500200099'},
-            {'text':'Account 9', 'value':'100000088'},
-            {'text':'Account 10', 'value':'200000088'},
-            {'text':'Account 11', 'value':'301000088'},
-            {'text':'Account 12', 'value':'500200099'},
-          ]);
-        });
-
-        $('#maintableSetSelectData2').click(function(){
-          $('#mainTable .entry-select').entrySelect('setData', [
-            {'text':'Account 21', 'value':'100000087'},
-            {'text':'Account 22', 'value':'200000087'},
-            {'text':'Account 23', 'value':'301000087'},
-            {'text':'Account 24', 'value':'500200097'},
-            {'text':'Account 25', 'value':'100000087'},
-            {'text':'Account 26', 'value':'200000087'},
-            {'text':'Account 27', 'value':'301000087'},
-            {'text':'Account 28', 'value':'500200097'},
-            {'text':'Account 29', 'value':'100000086'},
-            {'text':'Account 210', 'value':'200000085'},
-            {'text':'Account 211', 'value':'301000085'},
-            {'text':'Account 212', 'value':'500200095'},
-          ]);
-        });
+        $('#mainCodeName').entryCodeName({
+          data:[
+            {'text':'Code 01', 'value':'01'},
+            {'text':'Code 02', 'value':'02'},
+            {'text':'Code 03', 'value':'03'},
+            {'text':'Code 04', 'value':'04'},
+            {'text':'Code 05', 'value':'05'},
+            {'text':'Code 06', 'value':'06'},
+            {'text':'Code 07', 'value':'07'},
+            {'text':'Code 08', 'value':'08'},
+            {'text':'Code 09', 'value':'09'},
+            {'text':'Code 10', 'value':'10'},
+            {'text':'Code 11', 'value':'11'},
+            {'text':'Code 12', 'value':'12'},
+          ]});
     });
     </script>
   </body>
